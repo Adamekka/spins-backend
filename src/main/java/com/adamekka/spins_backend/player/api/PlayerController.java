@@ -29,7 +29,7 @@ public class PlayerController {
 
     @PostMapping("/reset")
     public PlayerResponse resetPlayer() {
-        Player player = playerService.resetCurrentPlayer();
+        Player player = spinService.resetCurrentPlayer();
         return new PlayerResponse(
             player.getId(), player.getUsername(), player.getBalance()
         );

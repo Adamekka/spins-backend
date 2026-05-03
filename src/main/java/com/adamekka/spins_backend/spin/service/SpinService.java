@@ -47,6 +47,15 @@ public class SpinService {
     private final ObjectMapper objectMapper;
 
     @Transactional
+    public Player resetCurrentPlayer() {
+        Player player = playerService.resetCurrentPlayer();
+        // Reset is an app-level restart, so persisted bonus sessions must not
+        // survive a balance reset.
+        spinRepository.clearActiveFreeSpinSessions(player, SpinType.FREE_SPIN);
+        return player;
+    }
+
+    @Transactional
     public SpinResponse spin(SpinRequest request) {
         BigDecimal bet = validateBet(request.bet());
         Player player = playerService.getCurrentPlayerForUpdate();

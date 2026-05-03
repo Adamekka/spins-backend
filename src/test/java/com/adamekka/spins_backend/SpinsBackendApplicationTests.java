@@ -53,6 +53,40 @@ class SpinsBackendApplicationTests {
     }
 
     @Test
+    void resetPlayerExhaustsActiveFreeSpinSessions() throws Exception {
+        MvcResult buyResult
+            = mockMvc
+                  .perform(post("/api/spin/buy")
+                               .contentType(MediaType.APPLICATION_JSON)
+                               .content("""
+                    {"paytableId":1,"bet":"1.00"}
+                    """))
+                  .andExpect(status().isOk())
+                  .andReturn();
+
+        JsonNode buyResponse = objectMapper.readTree(
+            buyResult.getResponse().getContentAsString()
+        );
+        long parentSpinId = buyResponse.get("parentSpinId").asLong();
+
+        mockMvc.perform(post("/api/player/reset"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.balance").value("1000.00"));
+
+        mockMvc.perform(get("/api/spin/{id}", parentSpinId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.remainingFreeSpins").value(0))
+            .andExpect(jsonPath("$.accumulatedMultiplier").value(0));
+
+        mockMvc
+            .perform(post("/api/spin/free")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content("{\"parentSpinId\":" + parentSpinId + "}"))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error").value("FREE_SPINS_EXHAUSTED"));
+    }
+
+    @Test
     void getPaytablesReturnsSeededConfig() throws Exception {
         mockMvc.perform(get("/api/paytables"))
             .andExpect(status().isOk())

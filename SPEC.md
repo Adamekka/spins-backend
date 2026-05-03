@@ -436,7 +436,7 @@ Response 200:
 
 ### 7.2 `POST /api/player/reset`
 
-Resetuje balance seed hráče na `1000.00`.
+Resetuje balance seed hráče na `1000.00` a ukončí aktivní free spin session tím, že nastaví zbývající free spiny na `0`.
 
 Response 200:
 
